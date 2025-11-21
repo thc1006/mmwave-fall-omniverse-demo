@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>mmWave Fall Detection Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <h1>mmWave Fall Detection Dashboard</h1>
+        <p>Top‑down view of 赤土崎多功能館 with real‑time fall events.</p>
+      </header>
+      <main class="app-main">
+        <section class="scene-section">
+          <canvas id="scene-canvas"></canvas>
+        </section>
+        <section class="timeline-section">
+          <h2>Fall Events Timeline</h2>
+          <ul id="event-timeline"></ul>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+# Core scientific stack
+numpy
+pandas
+pyarrow
+
+# Machine learning
+torch
+
+# API server
+fastapi
+uvicorn[standard]
+
+# Data validation
+pydantic

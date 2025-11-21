@@ -1,0 +1,14 @@
+[package]
+name = "mmwave.fall.extension"
+version = "0.1.0"
+title = "mmWave Fall Detection Demo"
+description = "Omniverse Kit extension that sets up a hall scene with RTX Radar mmWave fall detection."
+category = "Simulation"
+
+[dependencies]
+"omni.kit.uiapp" = {}
+"omni.isaac.core" = {}
+"omni.sensors.nv.radar" = {}
+
+[python]
+module = "mmwave_fall_extension"

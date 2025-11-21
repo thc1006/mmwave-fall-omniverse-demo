@@ -1,0 +1,8 @@
+{
+  "//": "Stub RTX Radar configuration. Replace with a real JSON config from Isaac Sim's RTX Radar examples.",
+  "horizontal_fov_deg": 90.0,
+  "vertical_fov_deg": 30.0,
+  "range_max_m": 30.0,
+  "range_min_m": 0.5,
+  "update_rate_hz": 10.0
+}
