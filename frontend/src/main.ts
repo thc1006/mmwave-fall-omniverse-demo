@@ -9,8 +9,7 @@ interface FallEvent {
   id: string;
   timestamp: number; // unix seconds
   label: string;
-  prob_fall: number;
-  prob_normal: number;
+  probabilities: Record<string, number>;
   position: Position;
 }
 
@@ -18,6 +17,20 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 const hallWidth = 20;
 const hallHeight = 10;
+
+function colorForLabel(label: string): number {
+  switch (label) {
+    case "fall":
+      return 0xef4444; // red
+    case "rehab_bad_posture":
+      return 0xf97316; // orange
+    case "chest_abnormal":
+      return 0x22d3ee; // cyan
+    case "normal":
+    default:
+      return 0x22c55e; // green
+  }
+}
 
 function setupScene(canvas: HTMLCanvasElement) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -27,7 +40,6 @@ function setupScene(canvas: HTMLCanvasElement) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x101018);
 
-  // Orthographic camera for top‑down 2D style view
   const aspect = (canvas.clientWidth || 800) / (canvas.clientHeight || 450);
   const viewWidth = hallWidth * 1.3;
   const viewHeight = viewWidth / aspect;
@@ -44,19 +56,16 @@ function setupScene(canvas: HTMLCanvasElement) {
   camera.up.set(0, 0, -1);
   camera.lookAt(0, 0, 0);
 
-  // Simple hall floor
   const floorGeom = new THREE.PlaneGeometry(hallWidth, hallHeight);
   const floorMat = new THREE.MeshBasicMaterial({ color: 0x1f2937 });
   const floor = new THREE.Mesh(floorGeom, floorMat);
   floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
 
-  // Grid / lines for reference
   const grid = new THREE.GridHelper(hallWidth, hallWidth, 0x4b5563, 0x374151);
   grid.rotation.x = Math.PI / 2;
   scene.add(grid);
 
-  // Light (for any future 3D avatars)
   const light = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(light);
 
@@ -64,7 +73,7 @@ function setupScene(canvas: HTMLCanvasElement) {
 
   function upsertEventMesh(ev: FallEvent) {
     let mesh = eventMeshes.get(ev.id);
-    const color = ev.label === "fall" ? 0xef4444 : 0x22c55e;
+    const color = colorForLabel(ev.label);
     if (!mesh) {
       const geom = new THREE.CircleGeometry(0.3, 24);
       const mat = new THREE.MeshBasicMaterial({ color });
@@ -121,6 +130,12 @@ async function fetchRecentEvents(): Promise<FallEvent[]> {
   }
 }
 
+function mostLikelyProb(ev: FallEvent): number {
+  const values = Object.values(ev.probabilities ?? {});
+  if (!values.length) return 0;
+  return Math.max(...values);
+}
+
 function updateTimeline(events: FallEvent[]) {
   const ul = document.getElementById("event-timeline");
   if (!ul) return;
@@ -133,13 +148,18 @@ function updateTimeline(events: FallEvent[]) {
     li.className = "event-item";
 
     const time = new Date(ev.timestamp * 1000).toLocaleTimeString();
-    const prob = (ev.prob_fall * 100).toFixed(1);
-    li.innerHTML = `<strong>[${time}]</strong> ${ev.label.toUpperCase()} · p(fall)=${prob}% · (x=${ev.position.x.toFixed(
+    const prob = (mostLikelyProb(ev) * 100).toFixed(1);
+    li.innerHTML = `<strong>[${time}]</strong> ${ev.label.toUpperCase()} · p*=${prob}% · (x=${ev.position.x.toFixed(
       1
     )}, y=${ev.position.y.toFixed(1)})`;
 
+    li.dataset.label = ev.label;
     if (ev.label === "fall") {
       li.classList.add("event-fall");
+    } else if (ev.label === "rehab_bad_posture") {
+      li.classList.add("event-rehab");
+    } else if (ev.label === "chest_abnormal") {
+      li.classList.add("event-chest");
     } else {
       li.classList.add("event-normal");
     }
@@ -155,7 +175,6 @@ async function main() {
   }
 
   const { upsertEventMesh } = setupScene(canvas);
-  const seen = new Set<string>();
   let cachedEvents: FallEvent[] = [];
 
   async function refresh() {
@@ -164,9 +183,6 @@ async function main() {
 
     cachedEvents = events;
     for (const ev of events) {
-      if (!seen.has(ev.id)) {
-        seen.add(ev.id);
-      }
       upsertEventMesh(ev);
     }
     updateTimeline(cachedEvents);
@@ -179,7 +195,6 @@ async function main() {
 window.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("scene-canvas") as HTMLCanvasElement | null;
   if (canvas) {
-    // Expand canvas to fill its container
     const parent = canvas.parentElement;
     if (parent) {
       canvas.width = parent.clientWidth;

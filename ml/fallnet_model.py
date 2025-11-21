@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict
 
 import torch
 from torch import nn
@@ -12,14 +13,23 @@ class FallNetConfig:
     hidden_dim: int = 256
     num_layers: int = 2
     dropout: float = 0.1
-    num_classes: int = 2  # 0 = normal, 1 = fall
+    # Multi-class support; default mapping:
+    # 0 = normal, 1 = fall, 2 = rehab_bad_posture, 3 = chest_abnormal
+    num_classes: int = 4
+    label_map: Dict[int, str] = field(default_factory=lambda: {
+        0: "normal",
+        1: "fall",
+        2: "rehab_bad_posture",
+        3: "chest_abnormal",
+    })
 
 
 class FallNet(nn.Module):
     """Simple MLP classifier for radar feature vectors.
 
-    This model expects inputs of shape [batch, frames, features] or [batch, features].
-    For sequence inputs, we apply mean pooling over the time dimension.
+    This model supports multi-class classification. It expects inputs of
+    shape [batch, frames, features] or [batch, features]. For sequence
+    inputs, we apply mean pooling over the time dimension.
     """
 
     def __init__(self, cfg: FallNetConfig):

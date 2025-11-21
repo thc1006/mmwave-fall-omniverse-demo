@@ -55,3 +55,12 @@ Claude should use this skill when the user asks you to:
 - “Add a simple validation split and report per-class precision/recall for fall vs normal.”
 - “Add feature normalization and experiment with a 1D-CNN architecture instead of an MLP.”
 - “Update the API to return a short natural-language explanation along with the numeric scores.”
+
+## Domain heuristics (for future refinement)
+
+- Consider known **micro-Doppler** patterns for human falls vs daily activities when
+  designing feature extractors or architectures.
+- Track per-class metrics such as sensitivity / specificity, especially for the
+  `fall` class (e.g., target sensitivity > 0.95, specificity >= 0.90).
+- When adding new classes (e.g., `rehab_bad_posture`, `chest_abnormal`), ensure the
+  dataset is balanced enough to avoid collapse into the dominant classes.

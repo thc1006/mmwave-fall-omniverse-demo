@@ -116,3 +116,24 @@ In this scaffold:
 **Important:** This repository intentionally stops at a **clean engineering boundary**:
 - It is *ready* for you (or Claude Code) to fill in Isaac Sim–specific details (asset paths, radar config).
 - It provides enough structure that you can focus on: scene design, animation, data quality, and ML, instead of wiring everything from scratch.
+
+---
+
+## Frontend dashboard (Three.js + Vite)
+
+This repo also includes a minimal web dashboard under `frontend/`:
+
+- Top‑down 2D/3D view of the hall using **Three.js** with an orthographic camera.
+- A sidebar timeline that shows recent events (normal / fall) with timestamps and positions.
+- The dashboard polls `GET /events/recent` from the FastAPI backend to stay up‑to‑date.
+
+Quick start:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The dashboard assumes the API is running on `http://localhost:8000` or whatever you set in
+`VITE_API_BASE` (e.g., `VITE_API_BASE=http://127.0.0.1:8000 npm run dev`).

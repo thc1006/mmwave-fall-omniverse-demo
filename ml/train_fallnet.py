@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -12,15 +12,33 @@ from torch import nn, optim
 from .fallnet_model import FallNet, FallNetConfig
 
 
-def load_dataset(data_dir: Path) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Load .npz episodes from `normal` and `fall` subdirectories.
+def discover_labels(data_dir: Path) -> Dict[str, int]:
+    """Discover subdirectories under data_dir as class labels.
 
-    Each .npz file is expected to contain `data` (frames x features) and `label`.
+    The mapping is sorted alphabetically for reproducibility, but we make a
+    best effort to keep "normal" at index 0 if it exists.
     """
-    xs = []
-    ys = []
+    subdirs = [p for p in data_dir.iterdir() if p.is_dir()]
+    names = sorted(p.name for p in subdirs)
+    if "normal" in names:
+        names.remove("normal")
+        names.insert(0, "normal")
+    return {name: idx for idx, name in enumerate(names)}
 
-    for label_name, label_idx in [("normal", 0), ("fall", 1)]:
+
+def load_dataset(data_dir: Path) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
+    """Load .npz episodes from class subdirectories under data_dir.
+
+    Each .npz file is expected to contain `data` (frames x features) and `label`
+    (string or ignored). Labels are inferred from the directory structure.
+    """
+    label_to_idx = discover_labels(data_dir)
+    idx_to_label = {idx: name for name, idx in label_to_idx.items()}
+
+    xs: List[np.ndarray] = []
+    ys: List[np.ndarray] = []
+
+    for label_name, label_idx in label_to_idx.items():
         subdir = data_dir / label_name
         if not subdir.exists():
             continue
@@ -37,7 +55,7 @@ def load_dataset(data_dir: Path) -> Tuple[torch.Tensor, torch.Tensor]:
 
     x = np.concatenate(xs, axis=0)
     y = np.concatenate(ys, axis=0)
-    return torch.from_numpy(x), torch.from_numpy(y)
+    return torch.from_numpy(x), torch.from_numpy(y), idx_to_label
 
 
 def train(
@@ -47,10 +65,10 @@ def train(
     batch_size: int = 32,
     lr: float = 1e-3,
 ) -> None:
-    x, y = load_dataset(data_dir)
+    x, y, idx_to_label = load_dataset(data_dir)
     num_samples, frames, features = x.shape
 
-    cfg = FallNetConfig(input_dim=features)
+    cfg = FallNetConfig(input_dim=features, num_classes=len(idx_to_label), label_map=idx_to_label)
     model = FallNet(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -86,11 +104,12 @@ def train(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save({"model_state_dict": model.state_dict(), "config": cfg.__dict__}, output_path)
     print(f"[train_fallnet] Saved model to {output_path}")
+    print(f"[train_fallnet] Label map: {idx_to_label}")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train fall detection model from RTX Radar data.")
-    parser.add_argument("--data-dir", type=str, default="ml/data", help="Directory with normal/ and fall/ subdirs.")
+    parser.add_argument("--data-dir", type=str, default="ml/data", help="Directory with class subdirectories.")
     parser.add_argument("--output", type=str, default="ml/fallnet.pt", help="Output path for the trained model.")
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch-size", type=int, default=32)
