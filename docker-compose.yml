@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  mmwave-fall-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mmwave-fall-api:latest
+    container_name: mmwave-fall-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount models directory to allow model swapping without rebuild
+      - ./ml:/app/models:ro
+    environment:
+      # Point to the best model (LSTM) by default
+      - MODEL_PATH=/app/models/fallnet_lstm.pt
+      # Uncomment to use other models:
+      # - MODEL_PATH=/app/models/fallnet_cnn.pt
+      # - MODEL_PATH=/app/models/fallnet.pt
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Optional: Add a network for future services (dashboard, etc.)
+networks:
+  default:
+    name: mmwave-network

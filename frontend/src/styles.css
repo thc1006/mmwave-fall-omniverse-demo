@@ -5,6 +5,12 @@
   color: #e5e7eb;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body, html {
   margin: 0;
   padding: 0;
@@ -17,23 +23,82 @@ body, html {
   min-height: 100vh;
 }
 
+/* Header */
 .app-header {
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid #1f2933;
   background: radial-gradient(circle at top left, #0f172a, #020617);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.app-header h1 {
+.app-header-left h1 {
   margin: 0;
   font-size: 1.4rem;
 }
 
-.app-header p {
+.app-header-left p {
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
   color: #9ca3af;
 }
 
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Connection Status Indicator */
+#connection-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-connected {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid #22c55e;
+}
+
+.status-disconnected {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+/* Sound Toggle Button */
+#sound-toggle {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #374151;
+  background-color: #1f2937;
+  color: #9ca3af;
+  transition: all 0.2s ease;
+}
+
+#sound-toggle:hover {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+#sound-toggle.active {
+  background-color: rgba(34, 197, 94, 0.2);
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+/* Main Layout */
 .app-main {
   display: grid;
   grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
@@ -53,11 +118,56 @@ body, html {
   display: block;
 }
 
+/* Alert Overlay */
+#alert-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+#alert-overlay.active {
+  animation: alert-flash 0.5s ease-in-out 4;
+}
+
+@keyframes alert-flash {
+  0%, 100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.15);
+    box-shadow: inset 0 0 60px rgba(239, 68, 68, 0.4);
+  }
+}
+
+/* Body alert state for border flash */
+body.fall-alert-active .scene-section {
+  animation: border-flash 0.5s ease-in-out 4;
+}
+
+@keyframes border-flash {
+  0%, 100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: inset 0 0 0 4px #ef4444;
+  }
+}
+
+/* Timeline Section */
 .timeline-section {
   padding: 0.75rem 1rem;
   background-color: #020617;
   border-left: 1px solid #1f2933;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .timeline-section h2 {
@@ -70,11 +180,18 @@ body, html {
   padding: 0;
   margin: 0;
   font-size: 0.9rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .event-item {
   padding: 0.45rem 0;
   border-bottom: 1px solid #111827;
+  transition: background-color 0.2s ease;
+}
+
+.event-item:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .event-item strong {
@@ -83,6 +200,9 @@ body, html {
 
 .event-fall {
   color: #fca5a5;
+  border-left: 3px solid #ef4444;
+  padding-left: 0.5rem;
+  animation: event-highlight 2s ease-out;
 }
 
 .event-normal {
@@ -91,8 +211,186 @@ body, html {
 
 .event-rehab {
   color: #fed7aa;
+  border-left: 3px solid #f97316;
+  padding-left: 0.5rem;
 }
 
 .event-chest {
   color: #a5f3fc;
+  border-left: 3px solid #22d3ee;
+  padding-left: 0.5rem;
+}
+
+@keyframes event-highlight {
+  0% {
+    background-color: rgba(239, 68, 68, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Statistics Panel */
+#stats-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #1f2933;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid #1f2933;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.stat-total .stat-value {
+  color: #e5e7eb;
+}
+
+.stat-fall {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.stat-fall .stat-value {
+  color: #ef4444;
+}
+
+.stat-normal .stat-value {
+  color: #22c55e;
+}
+
+.stat-rehab {
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.stat-rehab .stat-value {
+  color: #f97316;
+}
+
+.stat-chest {
+  border-color: rgba(34, 211, 238, 0.3);
+}
+
+.stat-chest .stat-value {
+  color: #22d3ee;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .app-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(300px, 1fr) auto;
+  }
+
+  .timeline-section {
+    border-left: none;
+    border-top: 1px solid #1f2933;
+    max-height: 40vh;
+  }
+
+  #stats-panel {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0.5rem 1rem;
+  }
+
+  .app-header-left h1 {
+    font-size: 1.2rem;
+  }
+
+  .app-header-left p {
+    font-size: 0.8rem;
+  }
+
+  #stats-panel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+  }
+
+  .event-item {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  #stats-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-item:first-child {
+    grid-column: span 2;
+  }
+
+  .timeline-section {
+    max-height: 50vh;
+  }
+}
+
+/* Scrollbar Styling */
+#event-timeline::-webkit-scrollbar,
+.timeline-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+#event-timeline::-webkit-scrollbar-track,
+.timeline-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#event-timeline::-webkit-scrollbar-thumb,
+.timeline-section::-webkit-scrollbar-thumb {
+  background-color: #374151;
+  border-radius: 3px;
+}
+
+#event-timeline::-webkit-scrollbar-thumb:hover,
+.timeline-section::-webkit-scrollbar-thumb:hover {
+  background-color: #4b5563;
 }

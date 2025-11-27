@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  isaac-sim:
+    image: nvcr.io/nvidia/isaac-sim:2023.1.1
+    container_name: isaac-sim-headless
+    runtime: nvidia
+    environment:
+      - ACCEPT_EULA=Y
+      - PRIVACY_CONSENT=Y
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      # Mount project directories
+      - ../sim:/isaac-sim/mmwave_fall/sim:rw
+      - ../facility:/isaac-sim/mmwave_fall/facility:ro
+      - ../ml/data:/isaac-sim/mmwave_fall/ml/data:rw
+      # Mount USD output directory
+      - ../sim/usd:/isaac-sim/mmwave_fall/sim/usd:rw
+      # Mount Isaac Sim cache for faster startup
+      - isaac-cache:/root/.cache/ov
+      - isaac-data:/root/.local/share/ov/data
+    ports:
+      - "8211:8211"  # Live streaming
+      - "8899:8899"  # Nucleus
+      - "47995:47995"  # WebSocket
+    command: >
+      ./python.sh -c "
+      import asyncio
+      from omni.isaac.kit import SimulationApp
+
+      simulation_app = SimulationApp({'headless': True})
+      print('[INFO] Isaac Sim headless mode started')
+
+      # Keep running
+      while simulation_app.is_running():
+          simulation_app.update()
+      "
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # API service for fall detection predictions
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: mmwave-fall-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../ml:/app/ml:ro
+      - ../services:/app/services:ro
+    environment:
+      - MODEL_PATH=/app/ml/fallnet_lstm.pt
+      - PYTHONUNBUFFERED=1
+    command: uvicorn services.api.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - isaac-sim
+
+  # Frontend dashboard
+  frontend:
+    image: node:18-alpine
+    container_name: mmwave-fall-frontend
+    working_dir: /app
+    volumes:
+      - ../frontend:/app
+    ports:
+      - "3000:3000"
+    command: npx vite --host 0.0.0.0 --port 3000
+    depends_on:
+      - api
+
+volumes:
+  isaac-cache:
+  isaac-data:
+
+networks:
+  default:
+    name: mmwave-fall-network

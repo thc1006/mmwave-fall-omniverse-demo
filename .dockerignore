@@ -1,0 +1,86 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Git
+.git/
+.gitignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+claude/
+CLAUDE.md
+
+# Documentation
+*.md
+!requirements.txt
+docs/
+
+# Test and development files
+tests/
+test_*.py
+*_test.py
+pytest.ini
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Datasets and large data files
+ml/data/
+datasets/
+*.npz
+*.npy
+*.csv
+*.parquet
+
+# Environment files (may contain secrets)
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Simulation files (not needed for API)
+sim/
+*.usd
+*.usda
+*.usdc
+
+# Other model files (we copy specific ones in Dockerfile)
+# Uncomment if you want to exclude all models from build context
+# ml/*.pt
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

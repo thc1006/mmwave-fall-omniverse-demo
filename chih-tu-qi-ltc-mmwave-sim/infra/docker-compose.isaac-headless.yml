@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  isaac-headless:
+    image: nvcr.io/nvidia/isaac-sim:4.2.0
+    runtime: nvidia
+    environment:
+      - ACCEPT_EULA=Y
+      - KIT_HEADLESS=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - PROJECT_ROOT=/workspace/chih-tu-qi-ltc-mmwave-sim
+    volumes:
+      - ..:/workspace/chih-tu-qi-ltc-mmwave-sim
+    working_dir: /workspace/chih-tu-qi-ltc-mmwave-sim
+    command: >
+      bash -lc "./infra/scripts/run_isaac_headless.sh"

@@ -1,0 +1,108 @@
+version: "3.9"
+
+# Isaac Sim Native Livestream Configuration
+# Use this if WebRTC streaming has issues (error 0x800E8401)
+#
+# Native Livestream uses the Omniverse Streaming Client instead of WebRTC.
+# Access via: omniverse://localhost:8211
+#
+# Requirements:
+# - Omniverse Streaming Client installed on client machine
+# - Network ports 8211, 47995-48012 accessible
+#
+# Usage:
+#   docker compose -f infra/docker-compose.isaac-native-streaming.yml up -d
+#   docker logs -f chih-tu-qi-ltc-mmwave-sim-isaac-native-streaming-1
+
+services:
+  isaac-native-streaming:
+    image: nvcr.io/nvidia/isaac-sim:4.2.0
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - ACCEPT_EULA=Y
+      - PRIVACY_CONSENT=Y
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all,graphics,display
+      - OMNI_KIT_ALLOW_ROOT=1
+      - VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
+      - PROJECT_ROOT=/workspace/chih-tu-qi-ltc-mmwave-sim
+      # Scene configuration
+      - USD_STAGE_PATH=/workspace/chih-tu-qi-ltc-mmwave-sim/sim/usd/chih_tu_qi_floor1_ltc.usd
+      - CAMERA_POSITION=15,15,10
+      - CAMERA_TARGET=0,0,0
+    volumes:
+      - ..:/workspace/chih-tu-qi-ltc-mmwave-sim
+      - isaac-sim-cache:/root/.cache/ov
+      - isaac-sim-data:/root/.local/share/ov/data
+      - isaac-sim-logs:/root/.nvidia-omniverse/logs
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /workspace/chih-tu-qi-ltc-mmwave-sim
+    network_mode: host
+    ipc: host
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8011/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "[Isaac Sim] Starting Native Livestream server..."
+        echo "[Isaac Sim] Checking GPU availability..."
+        nvidia-smi || { echo "GPU not available"; exit 1; }
+
+        echo "[Isaac Sim] Starting with Native Livestream..."
+        # Native livestream uses runheadless.native.sh
+        # If not available, fallback to manual configuration
+        if [ -f "/isaac-sim/runheadless.native.sh" ]; then
+            /isaac-sim/runheadless.native.sh \
+                --/app/window/width=1920 \
+                --/app/window/height=1080 \
+                --/renderer/activeGpu=0 \
+                --/app/renderer/resolution/width=1920 \
+                --/app/renderer/resolution/height=1080 \
+                --/rtx/post/aa/op=3 \
+                --/persistent/app/viewport/displayOptions=0 \
+                --/app/asyncRendering=false \
+                --/app/livestream/enabled=true \
+                --/app/livestream/proto=ws \
+                --allow-root
+        else
+            # Fallback: Use kit with explicit streaming configuration
+            echo "[Isaac Sim] Using fallback streaming configuration..."
+            /isaac-sim/kit/kit \
+                --ext-folder /isaac-sim/exts \
+                --ext-folder /isaac-sim/apps \
+                --enable omni.isaac.sim \
+                --enable omni.kit.livestream.native \
+                --/app/window/width=1920 \
+                --/app/window/height=1080 \
+                --/renderer/activeGpu=0 \
+                --/app/renderer/resolution/width=1920 \
+                --/app/renderer/resolution/height=1080 \
+                --/rtx/post/aa/op=3 \
+                --/app/livestream/enabled=true \
+                --/persistent/app/viewport/displayOptions=0 \
+                --/app/asyncRendering=false \
+                --allow-root \
+                --no-window
+        fi
+
+volumes:
+  isaac-sim-cache:
+  isaac-sim-data:
+  isaac-sim-logs:

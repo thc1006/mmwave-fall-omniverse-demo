@@ -1,14 +1,86 @@
-# Core scientific stack
-numpy
-pandas
-pyarrow
+# ============================================================================
+# mmWave Fall Detection - Python Dependencies
+# ============================================================================
+# Core scientific and numerical computing stack
+# ============================================================================
 
-# Machine learning
-torch
+# Numerical computing and array operations
+numpy>=1.24.0,<2.0.0
 
-# API server
-fastapi
-uvicorn[standard]
+# Data manipulation, analysis, and I/O
+pandas>=2.0.0,<3.0.0
 
-# Data validation
-pydantic
+# Arrow serialization for efficient data exchange
+pyarrow>=12.0.0,<16.0.0
+
+# Scientific computing and advanced mathematics
+scipy>=1.10.0,<2.0.0
+
+# ============================================================================
+# Machine Learning and Deep Learning
+# ============================================================================
+
+# PyTorch framework for neural networks
+# Install CPU or GPU version as needed:
+#   CPU:  torch>=2.0.0,<3.0.0
+#   GPU:  torch>=2.0.0,<3.0.0 (with CUDA support)
+torch>=2.0.0,<3.0.0
+
+# ============================================================================
+# Web API and Server Framework
+# ============================================================================
+
+# FastAPI: high-performance async web framework with auto-documentation
+fastapi>=0.104.0,<1.0.0
+
+# Uvicorn: ASGI server for running FastAPI applications
+# [standard] extra includes optional server implementations
+uvicorn[standard]>=0.24.0,<1.0.0
+
+# ============================================================================
+# Data Validation and Serialization
+# ============================================================================
+
+# Pydantic: data validation and serialization using Python type hints
+pydantic>=2.0.0,<3.0.0
+pydantic-core>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0,<3.0.0
+
+# ============================================================================
+# Testing and Quality Assurance
+# ============================================================================
+
+# pytest: testing framework
+pytest>=7.4.0,<8.0.0
+
+# pytest-asyncio: pytest plugin for testing async code
+pytest-asyncio>=0.21.0,<1.0.0
+
+# httpx: modern HTTP client used by TestClient
+httpx>=0.25.0,<1.0.0
+
+# pytest-cov: code coverage plugin for pytest
+pytest-cov>=4.1.0,<5.0.0
+
+# ============================================================================
+# Optional Dependencies (Recommended for Development)
+# ============================================================================
+
+# Type checking and static analysis
+mypy>=1.5.0,<2.0.0
+
+# Code formatter and linter (modern replacement for black, isort, flake8)
+# Requires uv for best performance: pip install uv
+ruff>=0.1.0,<1.0.0
+
+# Optional: For data science visualization during model development
+matplotlib>=3.8.0,<4.0.0
+
+# ============================================================================
+# Notes:
+# ============================================================================
+# 1. Isaac Sim and Omniverse Kit are NOT included (installed separately)
+# 2. PyTorch version depends on CUDA availability. Use CPU or GPU version.
+# 3. For development, install all packages including testing/quality tools.
+# 4. Consider using uv for faster installation: pip install uv && uv pip install -r requirements.txt
+# 5. For production, pin exact versions after testing with your use case.

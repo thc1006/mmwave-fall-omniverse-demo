@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "fs-project": {
+      "command": "mcp-server-fs",
+      "args": ["--root", "."]
+    },
+    "terminal-local": {
+      "command": "mcp-server-terminal",
+      "args": []
+    },
+    "docker-local": {
+      "command": "mcp-server-docker",
+      "args": []
+    }
+  }
+}

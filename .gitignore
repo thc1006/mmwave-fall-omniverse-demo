@@ -1,0 +1,56 @@
+# Claude Code configurations
+.claude/agents/
+.claude/commands/
+.claude/skills/
+
+# Python virtual environments (large files > 100MB)
+.venv/
+chih-tu-qi-ltc-mmwave-sim/.venv/
+*/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Data files
+.dat
+FallAllD/*
+ml/data/
+ml/models/
+SisFall/SisFall_dataset/
+SisFall_dataset.zip
+
+# Node modules
+frontend/node_modules/
+node_modules/
+
+# Sensitive/credential files (機密文檔)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+*_secret*
+*.secret
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+logs/

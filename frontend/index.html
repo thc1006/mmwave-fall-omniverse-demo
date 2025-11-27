@@ -1,26 +1,81 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mmWave Fall Detection Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  </head>
-  <body>
-    <div id="app">
-      <header class="app-header">
-        <h1>mmWave Fall Detection Dashboard</h1>
-        <p>Top‑down view of 赤土崎多功能館 with real‑time fall events.</p>
-      </header>
-      <main class="app-main">
-        <section class="scene-section">
-          <canvas id="scene-canvas"></canvas>
-        </section>
-        <section class="timeline-section">
-          <h2>Fall Events Timeline</h2>
-          <ul id="event-timeline"></ul>
-        </section>
-      </main>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <h1>mmWave Fall Detection System</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Statistics Panel -->
+            <section class="panel stats-panel">
+                <h2>Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalEvents">0</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                    <div class="stat-card fall-stat">
+                        <div class="stat-value" id="fallCount">0</div>
+                        <div class="stat-label">Falls Detected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="normalCount">0</div>
+                        <div class="stat-label">Normal Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="wsConnections">0</div>
+                        <div class="stat-label">Active Connections</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Floor Map and Event Feed Container -->
+            <div class="bottom-section">
+                <!-- Floor Map -->
+                <section class="panel floor-map-panel">
+                    <h2>Floor Map - Fall Positions</h2>
+                    <div class="floor-map-container">
+                        <canvas id="floorMap" width="400" height="300"></canvas>
+                        <div class="map-legend">
+                            <span class="legend-item"><span class="dot red"></span> Fall Event</span>
+                            <span class="legend-item"><span class="dot green"></span> Normal Activity</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Event Feed -->
+                <section class="panel event-feed-panel">
+                    <h2>Live Event Feed</h2>
+                    <div class="event-list" id="eventList">
+                        <div class="event-placeholder">Waiting for events...</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Fall Alert Overlay -->
+        <div class="fall-alert" id="fallAlert">
+            <div class="alert-content">
+                <div class="alert-icon">!</div>
+                <div class="alert-text">FALL DETECTED</div>
+                <div class="alert-details" id="alertDetails"></div>
+            </div>
+        </div>
     </div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+    <script src="app.js"></script>
+</body>
 </html>

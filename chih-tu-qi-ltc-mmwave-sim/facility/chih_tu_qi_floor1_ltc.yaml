@@ -1,0 +1,486 @@
+# =============================================================================
+# 赤土崎多功能館 一樓 長照日照中心 - 場地配置 (800 m²)
+# =============================================================================
+# 基於: architectural-floor-plans-2025.md 空間詳細規格
+# 座標系統: X軸(東西), Z軸(南北), Y軸(高度)
+# 原點: 建築物西南角
+# 單位: 公尺 (meters)
+# =============================================================================
+
+name: "赤土崎多功能館 一樓 長照日照中心"
+description: >
+  1F 長照日照中心包含失智專區、一般日照區、共享空間和支援空間。
+  總面積 800 m²，服務對象為 50-60 名長者，營運時段 09:00-17:00。
+floor: 1
+total_area_sqm: 800
+ceiling_height_m: 3.5
+
+# =============================================================================
+# 空間區域定義 (zones)
+# rect: {x: 起點X, z: 起點Z, w: 寬度(X方向), d: 深度(Z方向)}
+# =============================================================================
+zones:
+  # ---------------------------------------------------------------------------
+  # 入口區域
+  # ---------------------------------------------------------------------------
+  - id: "entrance_lobby"
+    type: "lobby"
+    name: "主入口大廳"
+    rect: {x: 0, z: 0, w: 10, d: 8}
+    area_sqm: 80
+    description: "接待櫃台、訪客等候區、無障礙入口"
+    features:
+      - "接待櫃台"
+      - "訪客等候椅 10 張"
+      - "電梯廳連接 B1/2F-4F"
+      - "無障礙坡道 (斜度 1:12)"
+    monitoring_priority: "medium"
+    fall_risk: "low"
+
+  # ---------------------------------------------------------------------------
+  # 失智專區 (200 m²) - 高監控優先區
+  # ---------------------------------------------------------------------------
+  - id: "dementia_quiet_room"
+    type: "activity_room"
+    name: "安靜活動室 (失智專區)"
+    rect: {x: 0, z: 8, w: 10, d: 8}
+    area_sqm: 80
+    description: >
+      低刺激環境，STC 65 隔音設計。
+      可調高度桌椅 10 組，懷舊治療素材，認知訓練桌遊。
+    features:
+      - "可調高度桌椅 10 組"
+      - "懷舊治療展示櫃"
+      - "音樂治療設備"
+      - "STC 65 隔音牆"
+    capacity: 25
+    monitoring_priority: "high"
+    fall_risk: "medium"
+
+  - id: "dementia_sensory_room"
+    type: "therapy_room"
+    name: "感官刺激室 (Snoezelen)"
+    rect: {x: 0, z: 16, w: 8, d: 7.5}
+    area_sqm: 60
+    description: >
+      多感官刺激空間：光纖燈、泡泡管、投影星空、白噪音機、觸覺牆。
+      用途：減緩焦慮、促進感官刺激。
+    features:
+      - "光纖燈、泡泡管"
+      - "投影星空系統"
+      - "白噪音機、自然音效"
+      - "觸覺牆、香氛療法"
+    capacity: 8
+    monitoring_priority: "high"
+    fall_risk: "low"
+    scheduled_usage:
+      - "10:00-11:00"
+      - "14:00-15:00"
+
+  - id: "dementia_wandering_corridor"
+    type: "corridor"
+    name: "徘徊走廊 (環形)"
+    rect: {x: 8, z: 16, w: 4, d: 7.5}
+    area_sqm: 30
+    description: >
+      環形動線無盡頭設計，雙側連續扶手 (75cm & 90cm)，
+      防滑地板止滑係數 0.6+，每 5m 一個護理呼叫鈕。
+    features:
+      - "環形動線設計"
+      - "雙高度連續扶手"
+      - "防滑地板"
+      - "紅外線偵測門禁"
+      - "GPS 手環追蹤"
+    monitoring_priority: "critical"
+    fall_risk: "high"
+    safety_features:
+      - "電子門禁 (感應卡+密碼)"
+      - "紅外線偵測自動通報護理站"
+      - "每 10m 攝影機"
+      - "每 5m 護理呼叫鈕"
+
+  - id: "dementia_wandering_corridor_ext"
+    type: "corridor"
+    name: "徘徊走廊延伸段"
+    rect: {x: 10, z: 8, w: 3, d: 8}
+    area_sqm: 24
+    description: "徘徊走廊的垂直延伸段，連接安靜活動室"
+    features:
+      - "連續扶手"
+      - "防滑地板"
+    monitoring_priority: "critical"
+    fall_risk: "high"
+
+  # ---------------------------------------------------------------------------
+  # 一般日照區 (300 m²)
+  # ---------------------------------------------------------------------------
+  - id: "group_activity_room"
+    type: "activity_room"
+    name: "團體活動室"
+    rect: {x: 13, z: 0, w: 15, d: 10}
+    area_sqm: 150
+    description: >
+      可移動隔間（電動隔音牆 STC 50）分隔為 2 間 75m² 空間。
+      活動：體適能、藝術療法、音樂活動、代間活動。
+    features:
+      - "電動隔音牆 (可分隔 2 間)"
+      - "120 吋電動布幕 + 4K 投影機"
+      - "8 聲道環繞音響"
+      - "可堆疊椅 60 張"
+    capacity: 60
+    monitoring_priority: "high"
+    fall_risk: "medium"
+    activities:
+      - type: "體適能課程"
+        schedule: "每周一、三、五"
+      - type: "藝術療法"
+        schedule: "每周二、四"
+      - type: "代間活動"
+        schedule: "每周五 10:00-11:00"
+
+  - id: "rehabilitation_room"
+    type: "therapy_room"
+    name: "復健訓練室"
+    rect: {x: 13, z: 10, w: 10, d: 8}
+    area_sqm: 80
+    description: >
+      物理治療 (PT) 設備：電動跑步機、固定式腳踏車、平衡訓練墊。
+      職能治療 (OT)：日常生活訓練區、認知訓練軟體。
+    features:
+      - "電動跑步機 2 台 (含扶手)"
+      - "固定式腳踏車 3 台"
+      - "上肢訓練器 2 台"
+      - "平衡訓練墊 5 組"
+      - "治療床 2 張"
+      - "日常生活訓練區 (模擬廚房/浴室)"
+    capacity: 10
+    monitoring_priority: "critical"
+    fall_risk: "high"
+    staff:
+      - "物理治療師 (每周 3 天)"
+      - "職能治療師 (每周 2 天)"
+      - "照服員 2 名"
+
+  - id: "rest_room"
+    type: "rest_area"
+    name: "休息室"
+    rect: {x: 23, z: 10, w: 7, d: 10}
+    area_sqm: 70
+    description: >
+      午休空間：可躺式沙發椅 10 張、閱讀區、電視區。
+      主要使用時段：12:30-14:00 午休。
+    features:
+      - "可躺式沙發椅 10 張"
+      - "閱讀區 (書櫃、放大鏡)"
+      - "55 吋電視 + 舒適沙發"
+      - "遮光簾、降噪設計"
+    capacity: 15
+    monitoring_priority: "medium"
+    fall_risk: "medium"
+
+  # ---------------------------------------------------------------------------
+  # 共享空間 (220 m²)
+  # ---------------------------------------------------------------------------
+  - id: "shared_dining"
+    type: "dining"
+    name: "共用餐廳"
+    rect: {x: 12, z: 18, w: 12, d: 10}
+    area_sqm: 120
+    description: >
+      一般餐桌 10 組 (6 人座)，輪椅友善桌 3 組，兒童餐椅 10 張。
+      分時使用：11:30-12:30 長者午餐，與 2F 幼兒錯峰 30 分鐘。
+    features:
+      - "一般餐桌 10 組 (6 人座)"
+      - "輪椅友善桌 3 組 (無桌腳設計)"
+      - "兒童餐椅 10 張 (跨齡共餐)"
+      - "保溫餐車 3 台"
+      - "洗手台 6 座"
+      - "緊急呼叫鈕 4 個角落"
+    capacity: 60
+    monitoring_priority: "medium"
+    fall_risk: "low"
+    schedule:
+      - time: "11:30-12:30"
+        usage: "長者午餐"
+      - time: "假日 10:00-11:00"
+        usage: "跨齡共融早餐"
+
+  - id: "prep_kitchen"
+    type: "kitchen"
+    name: "備餐廚房"
+    rect: {x: 24, z: 18, w: 6, d: 7}
+    area_sqm: 40
+    description: >
+      備餐加熱配餐區，非中央廚房。
+      設備：營業用冰箱、蒸飯箱、微波爐、三槽式洗碗槽。
+    features:
+      - "營業用冰箱 2 台"
+      - "蒸飯箱、微波爐、保溫台"
+      - "三槽式洗碗槽"
+      - "不鏽鋼工作台 4 組"
+      - "排煙設備 (符合消防法規)"
+    capacity: 3
+    monitoring_priority: "low"
+    fall_risk: "low"
+    restricted_access: true
+
+  - id: "accessible_garden"
+    type: "outdoor"
+    name: "無障礙庭園"
+    rect: {x: 24, z: 25, w: 6, d: 10}
+    area_sqm: 60
+    description: >
+      園藝治療空間：療癒植物、可食植物、高架花台 (75cm)。
+      與 2F 戶外遊戲區垂直呼應，每周五長幼共同園藝。
+    features:
+      - "高架花台 (高度 75cm，輪椅可及)"
+      - "療癒植物 (薰衣草、迷迭香、薄荷)"
+      - "可食植物 (小番茄、青蔥、九層塔)"
+      - "無障礙步道 (120cm 寬，斜度 1:12)"
+      - "遮陽棚 (50% 區域)"
+      - "休憩座椅 6 組"
+    capacity: 15
+    monitoring_priority: "medium"
+    fall_risk: "medium"
+    safety_features:
+      - "圍籬高度 150cm (防走失)"
+      - "監視器 2 支"
+      - "緊急呼叫鈕 2 個"
+      - "防滑透水磚"
+
+  # ---------------------------------------------------------------------------
+  # 支援空間 (100 m²)
+  # ---------------------------------------------------------------------------
+  - id: "nursing_station"
+    type: "medical"
+    name: "護理站"
+    rect: {x: 10, z: 0, w: 3, d: 8}
+    area_sqm: 25
+    description: >
+      健康監測中心：血壓計、血糖機、AED、氧氣筒。
+      CCTV 監控中心，藥物管理上鎖藥櫃。
+    features:
+      - "健康監測設備 (血壓、血糖、體溫)"
+      - "急救設備 (急救箱、AED、氧氣筒)"
+      - "上鎖藥櫃 + 用藥紀錄系統"
+      - "CCTV 監視器畫面"
+      - "電腦、印表機、檔案櫃"
+    capacity: 3
+    monitoring_priority: "critical"
+    fall_risk: "low"
+    staff:
+      - "護理師 1 名 (09:00-17:00)"
+      - "照服員 6 名 (輪班，同時 3 名在線)"
+      - "社工師 1 名 (每周訪視 2 次)"
+
+  - id: "accessible_toilet"
+    type: "restroom"
+    name: "無障礙廁所"
+    rect: {x: 28, z: 0, w: 5, d: 8}
+    area_sqm: 40
+    description: >
+      一般廁所 4 間 (男 2 女 2)，無障礙廁所 1 間 (8m²)，
+      沐浴間 1 間 (12m²，含洗澡椅、升降機)，尿布更換室 1 間。
+    features:
+      - "一般廁所 4 間"
+      - "無障礙廁所 1 間 (含扶手、緊急鈴)"
+      - "沐浴間 1 間 (洗澡椅、升降機)"
+      - "尿布更換室 1 間 (成人換尿布床)"
+      - "免治馬桶全面配備"
+      - "L 型扶手、暖風乾燥機"
+    capacity: 6
+    monitoring_priority: "high"
+    fall_risk: "high"
+    privacy_zone: true
+
+  - id: "storage_room"
+    type: "storage"
+    name: "儲藏室"
+    rect: {x: 28, z: 8, w: 5, d: 4}
+    area_sqm: 20
+    description: "長照物資儲存：輪椅、助行器、護理用品、清潔用品"
+    features:
+      - "輪椅、助行器儲存"
+      - "護理用品架"
+      - "清潔用品櫃"
+    monitoring_priority: "low"
+    fall_risk: "low"
+    restricted_access: true
+
+  - id: "staff_rest_room"
+    type: "office"
+    name: "員工休息室"
+    rect: {x: 28, z: 12, w: 5, d: 3}
+    area_sqm: 15
+    description: "照服員、護理師休息空間"
+    features:
+      - "休息沙發"
+      - "置物櫃"
+      - "簡易茶水間"
+    capacity: 4
+    monitoring_priority: "low"
+    fall_risk: "low"
+    restricted_access: true
+
+# =============================================================================
+# mmWave 雷達配置 (radars)
+# position: {x, y, z} - 安裝位置 (y 為高度)
+# rotation: {pitch, yaw, roll} - 旋轉角度 (度)
+# fov: {horizontal, vertical} - 視場角 (度)
+# range_m: 偵測距離 (公尺)
+# =============================================================================
+radars:
+  # ---------------------------------------------------------------------------
+  # Radar 1: 失智專區監控 (徘徊走廊 + 安靜活動室)
+  # ---------------------------------------------------------------------------
+  - id: "radar_dementia_zone"
+    name: "失智專區雷達"
+    model: "TI IWR6843ISK"
+    position: {x: 6.0, y: 2.8, z: 12.0}
+    rotation: {pitch: -15, yaw: 0, roll: 0}
+    fov: {horizontal: 120, vertical: 60}
+    range_m: 12.0
+    coverage_zones:
+      - "dementia_quiet_room"
+      - "dementia_wandering_corridor"
+      - "dementia_wandering_corridor_ext"
+    purpose: >
+      高優先區域：監控失智長者徘徊走廊活動，
+      偵測跌倒、異常步態、徘徊行為。
+    detection_targets:
+      - "fall"
+      - "wandering"
+      - "abnormal_gait"
+    alert_priority: "critical"
+
+  # ---------------------------------------------------------------------------
+  # Radar 2: 復健/活動區監控
+  # ---------------------------------------------------------------------------
+  - id: "radar_activity_zone"
+    name: "活動區雷達"
+    model: "TI IWR6843ISK"
+    position: {x: 18.0, y: 2.8, z: 5.0}
+    rotation: {pitch: -10, yaw: 180, roll: 0}
+    fov: {horizontal: 120, vertical: 60}
+    range_m: 15.0
+    coverage_zones:
+      - "group_activity_room"
+      - "rehabilitation_room"
+    purpose: >
+      活動區域：監控團體活動、復健訓練期間的跌倒風險，
+      特別注意物理治療期間的平衡訓練。
+    detection_targets:
+      - "fall"
+      - "rehab_bad_posture"
+      - "exercise_anomaly"
+    alert_priority: "high"
+
+  # ---------------------------------------------------------------------------
+  # Radar 3: 餐廳/庭園監控
+  # ---------------------------------------------------------------------------
+  - id: "radar_dining_garden"
+    name: "餐廳庭園雷達"
+    model: "TI IWR6843ISK"
+    position: {x: 18.0, y: 2.8, z: 23.0}
+    rotation: {pitch: -10, yaw: 90, roll: 0}
+    fov: {horizontal: 120, vertical: 60}
+    range_m: 12.0
+    coverage_zones:
+      - "shared_dining"
+      - "accessible_garden"
+    purpose: >
+      共享空間：監控用餐時段起身跌倒、
+      庭園活動時的跌倒偵測。
+    detection_targets:
+      - "fall"
+      - "chest_abnormal"
+    alert_priority: "medium"
+
+# =============================================================================
+# 人員動態設定 (avatars/agents)
+# =============================================================================
+avatars:
+  - type: "elderly"
+    name: "dementia_patient"
+    count: 15
+    spawn_zones:
+      - "dementia_quiet_room"
+      - "dementia_wandering_corridor"
+    behaviors:
+      - "wandering"
+      - "sitting"
+      - "standing"
+    fall_probability: 0.05
+
+  - type: "elderly"
+    name: "general_daycare"
+    count: 35
+    spawn_zones:
+      - "group_activity_room"
+      - "shared_dining"
+      - "rest_room"
+    behaviors:
+      - "walking"
+      - "sitting"
+      - "exercise"
+    fall_probability: 0.02
+
+  - type: "staff"
+    name: "caregiver"
+    count: 3
+    spawn_zones:
+      - "nursing_station"
+      - "group_activity_room"
+      - "rehabilitation_room"
+    behaviors:
+      - "patrol"
+      - "assist"
+    fall_probability: 0.001
+
+  - type: "staff"
+    name: "therapist"
+    count: 1
+    spawn_zones:
+      - "rehabilitation_room"
+    behaviors:
+      - "assist"
+      - "supervise"
+    fall_probability: 0.001
+
+# =============================================================================
+# 模擬情境 (scenarios)
+# =============================================================================
+scenarios:
+  - id: "normal_operation"
+    name: "正常營運"
+    description: "09:00-17:00 日常營運模擬"
+    duration_hours: 8
+    events:
+      - time: "09:00"
+        action: "長者陸續抵達"
+      - time: "10:00"
+        action: "團體活動開始"
+      - time: "11:30"
+        action: "午餐時間"
+      - time: "12:30"
+        action: "午休時段"
+      - time: "14:00"
+        action: "復健訓練"
+      - time: "17:00"
+        action: "長者離場"
+
+  - id: "fall_incident"
+    name: "跌倒事件模擬"
+    description: "模擬長者在不同區域跌倒"
+    fall_locations:
+      - "dementia_wandering_corridor"
+      - "rehabilitation_room"
+      - "accessible_toilet"
+      - "shared_dining"
+
+  - id: "wandering_alert"
+    name: "徘徊警報模擬"
+    description: "失智長者徘徊至危險區域"
+    trigger_zones:
+      - "entrance_lobby"
+      - "prep_kitchen"

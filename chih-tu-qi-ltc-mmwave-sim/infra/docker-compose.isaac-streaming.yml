@@ -1,0 +1,79 @@
+version: "3.9"
+services:
+  isaac-streaming:
+    image: nvcr.io/nvidia/isaac-sim:4.2.0
+    runtime: nvidia
+    # Required for GPU access in Docker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - ACCEPT_EULA=Y
+      - PRIVACY_CONSENT=Y
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all,graphics,display
+      # Streaming configuration
+      - OMNI_KIT_ALLOW_ROOT=1
+      - STREAMING_CLIENT=webrtc
+      # Disable validation layers for performance
+      - VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json
+      # Project paths
+      - PROJECT_ROOT=/workspace/chih-tu-qi-ltc-mmwave-sim
+    volumes:
+      # Project workspace
+      - ..:/workspace/chih-tu-qi-ltc-mmwave-sim
+      # Persistent cache for faster startup
+      - isaac-sim-cache:/root/.cache/ov
+      - isaac-sim-data:/root/.local/share/ov/data
+      - isaac-sim-logs:/root/.nvidia-omniverse/logs
+      # X11 socket for display (optional, for debugging)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /workspace/chih-tu-qi-ltc-mmwave-sim
+    # Network mode for WebRTC
+    network_mode: host
+    # Required for GPU memory allocation
+    ipc: host
+    # Security options for NVIDIA
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8211/streaming/webrtc-demo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    # Use entrypoint script for proper initialization
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "[Isaac Sim Streaming] Starting WebRTC streaming server..."
+
+        # Wait for GPU to be ready
+        nvidia-smi || { echo "GPU not available"; exit 1; }
+
+        # Start Isaac Sim with WebRTC streaming
+        /isaac-sim/runheadless.webrtc.sh \
+          --/app/window/width=1920 \
+          --/app/window/height=1080 \
+          --/app/livestream/logLevel=verbose \
+          --/renderer/activeGpu=0 \
+          --/app/renderer/resolution/width=1920 \
+          --/app/renderer/resolution/height=1080 \
+          --/rtx/post/aa/op=3 \
+          --/persistent/app/viewport/displayOptions=0 \
+          --/app/asyncRendering=false \
+          --allow-root
+
+volumes:
+  isaac-sim-cache:
+  isaac-sim-data:
+  isaac-sim-logs:

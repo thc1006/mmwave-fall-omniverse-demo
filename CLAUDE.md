@@ -2,6 +2,17 @@
 
 This file guides Claude Code when working inside the **mmwave-fall-omniverse-demo** repository.
 
+
+你必須使用 .claude/agents 目錄底下的 claude subagents 來進行超高速開發，任何需要下載的檔案請幫我直接進行下載（本機密碼：Kinoshita15@）
+
+> 你有 playwright MCP 可以直接進行使用。
+
+- 「請打開 chih-tu-qi-ltc-mmwave-sim/architectural-floor-plans-2025.md 的『空間詳細規格-1』段落，幫我把每個空間轉成 facility/chih_tu_qi_floor1_ltc.yaml 裡的 zones 陣列，每個 zone 要有 id、type、rect（x,z,w,d，以公尺）和功能描述；順便設計 3 個 mmWave radar 的位置和 FOV，填進 radars。」
+- 「用 terminal-local 幫我跑：docker compose -f infra/docker-compose.isaac-headless.yml up -d，然後確認容器有起來，再幫我寫一個指令腳本讓我可以 ./infra/scripts/run_sim_job.sh ... 叫 Isaac Sim 跑特定 scenario。」
+- 「請改寫 sim/usd/generate_floor1_from_yaml.py，讀 facility/chih_tu_qi_floor1_ltc.yaml 裡的 zones / radars，用 UsdGeom.Cube 來畫出每個空間（寬 w、深 d、高固定 2.5m），再用 Xform 放 radar anchor，輸出 sim/usd/chih_tu_qi_floor1_ltc.usd。」
+- 「請在 services/api/main.py 裡幫我加上 /predict，接收 List[List[float]]，呼叫 FallNet 模型做推論，並回傳 label 和每個類別的機率；順便幫我寫一個 uvicorn 啟動指令到 Makefile 裡。」
+
+
 ---
 
 ## 1. Project overview
@@ -145,7 +156,7 @@ Claude Code can assist via the `/run-demo` command.
 
 ---
 
-## 7. Future improvements (optional)
+## 7. Improvements
 
 - Replace synthetic animations with more realistic motion capture clips.
 - Add additional classes (sitting, lying down, bending) and explore multi‑class classification.

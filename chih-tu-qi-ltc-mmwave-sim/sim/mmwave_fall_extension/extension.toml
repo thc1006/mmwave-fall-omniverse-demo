@@ -1,0 +1,24 @@
+[package]
+title = "mmWave Fall Detection Extension"
+description = "Omniverse Kit extension for mmWave radar fall detection simulation"
+version = "1.0.0"
+category = "Simulation"
+authors = ["Chih-Tu-Qi LTC"]
+repository = ""
+keywords = ["radar", "mmwave", "fall", "detection", "simulation", "isaac"]
+
+[dependencies]
+"omni.kit.uiapp" = {}
+"omni.isaac.core" = {}
+"omni.isaac.sensor" = {}
+"isaacsim.sensors.rtx" = {}
+
+[[python.module]]
+name = "mmwave_fall_extension"
+
+[settings]
+exts."mmwave_fall_extension".default_stage = "sim/usd/chih_tu_qi_floor1_ltc.usd"
+exts."mmwave_fall_extension".output_dir = "ml/data"
+exts."mmwave_fall_extension".radar_range_m = 10.0
+exts."mmwave_fall_extension".radar_fov_h = 120.0
+exts."mmwave_fall_extension".radar_fov_v = 60.0

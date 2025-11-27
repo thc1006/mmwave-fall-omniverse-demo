@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isaac Sim 3D Streaming - mmWave Fall Detection</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #76ff03;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.connected { background: #4caf50; }
+        .status-dot.disconnected { background: #f44336; }
+        .status-dot.connecting { background: #ff9800; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+        .video-container {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        #streamVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+        .video-placeholder i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .panel h3 {
+            color: #76ff03;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .connection-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-group label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        .form-group input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.95em;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #76ff03;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #76ff03;
+            color: #000;
+        }
+        .btn-primary:hover {
+            background: #64dd17;
+        }
+        .btn-danger {
+            background: #f44336;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stat-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #76ff03;
+        }
+        .stat-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .log-panel {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .log-entry.info { color: #4fc3f7; }
+        .log-entry.success { color: #81c784; }
+        .log-entry.error { color: #e57373; }
+        .log-entry.warning { color: #ffb74d; }
+        .instructions {
+            background: rgba(118,255,3,0.1);
+            border: 1px solid rgba(118,255,3,0.3);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .instructions h4 {
+            color: #76ff03;
+            margin-bottom: 10px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+            color: #ccc;
+        }
+        .instructions code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #76ff03;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Isaac Sim 3D Streaming Viewer</h1>
+            <p>赤土崎多功能館 mmWave Fall Detection Demo</p>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-dot" id="wsStatus"></span>
+                    <span>WebSocket</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="rtcStatus"></span>
+                    <span>WebRTC</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="streamStatus"></span>
+                    <span>Stream</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="video-container">
+                <video id="streamVideo" autoplay playsinline muted></video>
+                <div class="video-placeholder" id="placeholder">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🎮</div>
+                    <h3>Isaac Sim 3D Stream</h3>
+                    <p style="margin-top: 10px; color: #888;">點擊 "Connect" 開始串流</p>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="panel">
+                    <h3>Connection Settings</h3>
+                    <div class="connection-form">
+                        <div class="form-group">
+                            <label>Isaac Sim Host</label>
+                            <input type="text" id="hostInput" value="localhost" />
+                        </div>
+                        <div class="form-group">
+                            <label>WebSocket Port</label>
+                            <input type="text" id="portInput" value="49100" />
+                        </div>
+                        <button class="btn btn-primary" id="connectBtn" onclick="connect()">Connect</button>
+                        <button class="btn btn-danger" id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Stream Statistics</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="fps">0</div>
+                            <div class="stat-label">FPS</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="bitrate">0</div>
+                            <div class="stat-label">Kbps</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="latency">0</div>
+                            <div class="stat-label">Latency (ms)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="resolution">-</div>
+                            <div class="stat-label">Resolution</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Connection Log</h3>
+                    <div class="log-panel" id="logPanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4>使用說明</h4>
+            <ol>
+                <li>確認 Isaac Sim 已啟動並開啟串流模式</li>
+                <li>執行: <code>./isaac-sim.streaming.sh</code></li>
+                <li>WebSocket 端口預設為 <code>49100</code></li>
+                <li>如果是遠端連接，請將 Host 改為 Isaac Sim 主機 IP</li>
+                <li>點擊 <strong>Connect</strong> 開始接收 3D 渲染串流</li>
+            </ol>
+            <p style="margin-top: 15px; color: #888;">
+                <strong>注意:</strong> Isaac Sim 5.x 使用 Native Streaming，
+                完整功能需要 <a href="https://docs.omniverse.nvidia.com/streaming/latest/index.html" target="_blank" style="color: #76ff03;">Omniverse Streaming Client</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let pc = null;
+        let statsInterval = null;
+
+        function log(message, type = 'info') {
+            const logPanel = document.getElementById('logPanel');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function updateStatus(element, status) {
+            const el = document.getElementById(element);
+            el.className = 'status-dot ' + status;
+        }
+
+        async function connect() {
+            const host = document.getElementById('hostInput').value;
+            const port = document.getElementById('portInput').value;
+            const wsUrl = `ws://${host}:${port}`;
+
+            log(`Connecting to ${wsUrl}...`);
+            updateStatus('wsStatus', 'connecting');
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    log('WebSocket connected', 'success');
+                    updateStatus('wsStatus', 'connected');
+                    document.getElementById('connectBtn').disabled = true;
+                    document.getElementById('disconnectBtn').disabled = false;
+                    initWebRTC();
+                };
+
+                ws.onmessage = async (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        await handleSignaling(data);
+                    } catch (e) {
+                        log(`Message error: ${e.message}`, 'warning');
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    log(`WebSocket error: ${error}`, 'error');
+                    updateStatus('wsStatus', 'disconnected');
+                };
+
+                ws.onclose = () => {
+                    log('WebSocket disconnected', 'warning');
+                    updateStatus('wsStatus', 'disconnected');
+                    cleanup();
+                };
+
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+                updateStatus('wsStatus', 'disconnected');
+            }
+        }
+
+        function initWebRTC() {
+            log('Initializing WebRTC...');
+            updateStatus('rtcStatus', 'connecting');
+
+            const config = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' }
+                ]
+            };
+
+            pc = new RTCPeerConnection(config);
+
+            pc.ontrack = (event) => {
+                log('Received video track', 'success');
+                const video = document.getElementById('streamVideo');
+                video.srcObject = event.streams[0];
+                document.getElementById('placeholder').style.display = 'none';
+                video.style.display = 'block';
+                updateStatus('streamStatus', 'connected');
+                startStatsCollection();
+            };
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate
+                    }));
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                log(`Connection state: ${pc.connectionState}`);
+                if (pc.connectionState === 'connected') {
+                    updateStatus('rtcStatus', 'connected');
+                } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                    updateStatus('rtcStatus', 'disconnected');
+                }
+            };
+
+            // Request offer from server
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'request-offer' }));
+            }
+        }
+
+        async function handleSignaling(data) {
+            if (!pc) return;
+
+            if (data.type === 'offer') {
+                log('Received SDP offer');
+                await pc.setRemoteDescription(new RTCSessionDescription(data));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                ws.send(JSON.stringify({
+                    type: 'answer',
+                    sdp: answer.sdp
+                }));
+                log('Sent SDP answer');
+            } else if (data.type === 'ice-candidate' && data.candidate) {
+                log('Received ICE candidate');
+                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        }
+
+        function startStatsCollection() {
+            if (statsInterval) clearInterval(statsInterval);
+
+            statsInterval = setInterval(async () => {
+                if (!pc) return;
+
+                const stats = await pc.getStats();
+                stats.forEach(report => {
+                    if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        const fps = report.framesPerSecond || 0;
+                        const bytesReceived = report.bytesReceived || 0;
+
+                        document.getElementById('fps').textContent = Math.round(fps);
+
+                        if (report.frameWidth && report.frameHeight) {
+                            document.getElementById('resolution').textContent =
+                                `${report.frameWidth}x${report.frameHeight}`;
+                        }
+                    }
+                });
+            }, 1000);
+        }
+
+        function disconnect() {
+            cleanup();
+            log('Disconnected', 'warning');
+        }
+
+        function cleanup() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            if (pc) {
+                pc.close();
+                pc = null;
+            }
+            if (statsInterval) {
+                clearInterval(statsInterval);
+                statsInterval = null;
+            }
+
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+            document.getElementById('streamVideo').srcObject = null;
+            document.getElementById('streamVideo').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'flex';
+            updateStatus('wsStatus', 'disconnected');
+            updateStatus('rtcStatus', 'disconnected');
+            updateStatus('streamStatus', 'disconnected');
+        }
+
+        // Initialize status
+        updateStatus('wsStatus', 'disconnected');
+        updateStatus('rtcStatus', 'disconnected');
+        updateStatus('streamStatus', 'disconnected');
+        log('Ready to connect');
+    </script>
+</body>
+</html>
